@@ -1,0 +1,43 @@
+# model params
+backbone_type: resnet_v2_m_18
+loss_type: arcface
+out_type: E
+
+image_size: 112
+embd_size: 512
+class_num: 180844
+
+
+# hyper params
+bn_decay: 0.9
+keep_prob: 0.4
+weight_decay: !!float 5e-4
+logits_scale: 64.0
+logits_margin: 0.5
+momentum: 0.9
+
+
+# run params
+fixed_epoch_num: 1
+val_bn_train: False
+augment_flag: True
+augment_margin: 16
+
+gpu_num: 1
+batch_size: 256
+epoch_num: 20
+step_per_epoch: 100000
+val_freq: 100
+
+lr_steps: [3000, 6000, 20000]
+lr_values: [0.008, 0.002, 0.0012, 0.0004]
+
+
+# paths
+pretrained_model: ''
+
+train_data: ['/raid/dataset/deepglint_glass_emotion_tfrecords_v2/train.tfrecord']
+val_data: {'agedb_30': '/home/iim/FY/insightface/datasets/faces_emore/agedb_30.bin', 'lfw':'/home/iim/FY/insightface/datasets/faces_emore/lfw.bin', 'cfp_ff': '/home/iim/FY/insightface/datasets/faces_emore/cfp_ff.bin', 'cfp_fp': '/home/iim/FY/insightface/datasets/faces_emore/cfp_fp.bin', 'calfw': '/home/iim/FY/insightface/datasets/faces_emore/calfw.bin', 'cplfw': '/home/iim/FY/insightface/datasets/faces_emore/cplfw.bin', 'vgg2_fp': '/home/iim/FY/insightface/datasets/faces_emore/vgg2_fp.bin'}
+
+output_dir: './output'
+

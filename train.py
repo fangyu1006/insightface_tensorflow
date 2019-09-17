@@ -20,7 +20,7 @@ from evaluate import load_bin, evaluate
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--config_path', type=str, help='path to config file', default='./configs/config_ms1m_100.yaml')
+    parser.add_argument('--config_path', type=str, help='path to config file', default='./configs/config_ms1m_res18.yaml')
 
     return parser.parse_args()
 
@@ -78,7 +78,7 @@ class Trainer:
         if self.gpu_num <= 1:
             self.embds, self.logits = inference(self.train_images, self.train_labels, self.train_phase_dropout, self.train_phase_bn, self.config)
             self.embds = tf.identity(self.embds, 'embeddings')
-            self.inference_loss = slim.losses.sparse_softmax_cross_entropy(logits=self.logits, labels=self.train_labels)
+            self.inference_loss = tf.contrib.losses.sparse_softmax_cross_entropy(logits=self.logits, labels=self.train_labels)
             self.wd_loss = tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
             self.train_loss = self.inference_loss+self.wd_loss
             pred = tf.arg_max(tf.nn.softmax(self.logits), dimension=-1, output_type=tf.int64)
@@ -99,7 +99,7 @@ class Trainer:
         ])
 
     def run_embds(self, sess, images):
-        batch_num = len(images)/self.batch_size
+        batch_num = int(len(images)/self.batch_size)
         left = len(images) % self.batch_size
         embds = []
         for i in range(batch_num):
@@ -125,7 +125,7 @@ class Trainer:
             saver_ckpt = tf.train.Saver()
             saver_best = tf.train.Saver()
             ## TODO
-            saver_embd = tf.train.Saver(var_list=[v for v in tf.trainable_variables() if 'embd_extractor' in v.name])
+            #saver_embd = tf.train.Saver(var_list=[v for v in tf.trainable_variables() if 'embd_extractor' in v.name])
             if config['pretrained_model'] != '':
                 saver_embd.restore(sess, config['pretrained_model'])
             summary_writer = tf.summary.FileWriter(self.log_dir, sess.graph)
@@ -134,7 +134,7 @@ class Trainer:
             counter = 0
             debug = True
             for i in range(self.epoch_num):
-                if i < config['fixd_epoch_num']:
+                if i < config['fixed_epoch_num']:
                     cur_train_op = self.train_op_softmax
                 else:
                     cur_train_op = self.train_op

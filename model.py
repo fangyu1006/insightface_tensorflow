@@ -2,13 +2,13 @@ import tensorflow as tf
 from backbones import fresnet
 
 def get_embd(inputs, is_training_dropout, is_training_bn, config, reuse=False, scope='embd_extractor'):
-	num_classes = 512
-	num_layers = 18
-	filter_list = [64,64,128,256,512]
-	bottle_neck = False
-	num_stages = 4
+    num_classes = 512
+    num_layers = 18
+    filter_list = [64,64,128,256,512]
+    bottle_neck = False
+    num_stages = 4
 
-	if num_layers == 18:
+    if num_layers == 18:
         units = [2, 2, 2, 2]
     elif num_layers == 34:
         units = [3, 4, 6, 3]
@@ -48,13 +48,13 @@ def get_embd(inputs, is_training_dropout, is_training_bn, config, reuse=False, s
         raise ValueError("no experiments done on num_layers {}, you can do it yourself".format(num_layers))
 
     net = fresnet.resnet(inputs  = inputs,
-    					units       = units,
-        				num_stages  = num_stages,
-        				filter_list = filter_list,
-        				num_classes = num_classes,
-        				bottle_neck = bottle_neck,
-        				is_training_dropout = is_training_dropout,
-        				is_training_bn = is_training_bn)
+    			units       = units,
+        		num_stages  = num_stages,
+        		filter_list = filter_list,
+        		num_classes = num_classes,
+        		bottle_neck = bottle_neck,
+        		is_training_dropout = is_training_dropout,
+        		is_training_bn = is_training_bn)
 
     return net
 
