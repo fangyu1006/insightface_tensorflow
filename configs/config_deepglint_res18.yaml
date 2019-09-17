@@ -1,0 +1,42 @@
+# model params
+backbone_type: resnet_v2_18
+loss_type: arcface
+out_type: E
+
+image_size: 112
+embd_size: 512
+class_num: 180844
+
+
+# hyper params
+bn_decay: 0.9
+keep_prob: 0.4
+weight_decay: !!float 5e-4
+logits_scale: 64.0
+logits_margin: 0.5
+momentum: 0.9
+
+
+# run params
+val_bn_train: False
+augment_flag: True
+augment_margin: 16
+
+gpu_num: 1
+batch_size: 256
+epoch_num: 20
+step_per_epoch: 100000
+val_freq: 200
+
+lr_steps: [3000, 6000, 120000]
+lr_values: [0.008, 0.004, 0.001, 0.0004]
+
+
+# paths
+pretrained_model: ''
+
+train_data: ['//media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/train.tfrecord']
+val_data: {'agedb_30': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/agedb_30.bin', 'lfw': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/lfw.bin', 'cfp_ff': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/cfp_ff.bin', 'cfp_fp': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/cfp_fp.bin', 'calfw': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/calfw.bin', 'cplfw': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/cplfw.bin', 'vgg2_fp': '/media/fangyu/dbcc63bb-91c8-4929-89ac-abc4b296d4ed/data/deepglint_glass_emotion_tfrecords_v2/eval/vgg2_fp.bin'}
+
+output_dir: './output'
+
