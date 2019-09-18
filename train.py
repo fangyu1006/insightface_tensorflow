@@ -124,10 +124,18 @@ class Trainer:
             tf.global_variables_initializer().run()
             saver_ckpt = tf.train.Saver()
             saver_best = tf.train.Saver()
-            ## TODO
             #saver_embd = tf.train.Saver(var_list=[v for v in tf.trainable_variables() if 'embd_extractor' in v.name])
+            v_names = []
+            with open('/home/fangyu/fy/tflite/myinsightface_tf/origin_valiable_names.txt', 'r') as fd:
+                lines = fd.readlines()
+            for line in lines:
+                v_names.append(line.strip())
+            #var_list=[v for v in tf.trainable_variables() if v.name in v_names]
+            #print(var_list)
+            saver_embd = tf.train.Saver(var_list=[v for v in tf.trainable_variables() if v.name in v_names])
+
             if config['pretrained_model'] != '':
-                saver_embd.restore(sess, config['pretrained_model'])
+                saver_embd.restore(sess, tf.train.latest_checkpoint(config['pretrained_model']))
             summary_writer = tf.summary.FileWriter(self.log_dir, sess.graph)
             start_time = time.time()
             best_acc = 0
