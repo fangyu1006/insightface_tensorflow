@@ -87,9 +87,9 @@ def resnet(inputs, units, num_stages, filter_list, num_classes, bottle_neck, is_
 	data = inputs - minusscalar0_second
 	data = data * mulscalar0_second
 	body = data
-	conv0_pad = tf.pad(data, paddings = [[0, 0], [1, 1], [1, 1], [0, 0]])
+	conv0_pad = tf.pad(body, paddings = [[0, 0], [1, 1], [1, 1], [0, 0]])
 	conv1 = tf.compat.v1.layers.conv2d(inputs=conv0_pad, filters=filter_list[0], kernel_size=(3,3),strides=(1,1), padding='valid',use_bias=False,name='conv0')
-	body = tf.compat.v1.layers.batch_normalization(body, momentum=0.9, epsilon=2e-05, name='bn0', training=is_training_bn)
+	body = tf.compat.v1.layers.batch_normalization(inputs=conv1, momentum=0.9, epsilon=2e-05, name='bn0', training=is_training_bn)
 	body = prelu(body, name='relu0')
 
 	for i in range(num_stages):
