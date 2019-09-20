@@ -39,8 +39,8 @@ def load_bin(path, image_size):
         img = misc.imresize(img, [image_size, image_size])
         # img = img[s:s+image_size, s:s+image_size, :]
         img_f = np.fliplr(img)
-        img = img/127.5-1.0
-        img_f = img_f/127.5-1.0
+        #img = img/127.5-1.0
+        #img_f = img_f/127.5-1.0
         images[cnt] = img
         images_f[cnt] = img_f
         cnt += 1

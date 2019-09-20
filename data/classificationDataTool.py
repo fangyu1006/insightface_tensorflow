@@ -56,7 +56,8 @@ class ClassificationImageData:
             augment_size = self.img_size + self.augment_margin
             img = augmentation(img, augment_size)
         
-        img = tf.cast(img, tf.float32) / 127.5 - 1
+        #img = tf.cast(img, tf.float32) / 127.5 - 1
+        img = tf.cast(img, tf.float32)
 
         return img
 
