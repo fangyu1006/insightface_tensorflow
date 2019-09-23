@@ -54,6 +54,7 @@ class Trainer:
         self.val_freq = config['val_freq']
         self.val_data = config['val_data']
         self.val_bn_train = config['val_bn_train']
+        self.quantize = True
 
         with open(os.path.join(self.output_dir, 'config.yaml'), 'w') as f:
             f.write(yaml.dump(self.config))
@@ -86,6 +87,10 @@ class Trainer:
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             ## TODO
             vars_softmax = [v for v in tf.trainable_variables() if 'embd_extractor' not in v.name]
+
+            if self.quantize is True:
+                print("use quantize aware training!!!!!!!!!!!!!!!!!!!!!")
+                tf.contrib.quantize.create_training_graph(quant_delay=200)
 
             with tf.control_dependencies(update_ops):
                 self.train_op = tf.train.MomentumOptimizer(learning_rate=self.lr, momentum=self.config['momentum']).minimize(self.train_loss)
