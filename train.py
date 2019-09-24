@@ -20,13 +20,13 @@ from evaluate import load_bin, evaluate
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--config_path', type=str, help='path to config file', default='./configs/config_ms1m_res18.yaml')
+    parser.add_argument('--config_path', type=str, help='path to config file', default='./configs/config_deepglint_res18.yaml')
 
     return parser.parse_args()
 
 
 def inference(images, labels, is_training_dropout, is_training_bn, config):
-    embds = get_embd(images, is_training_dropout, is_training_bn, config)
+    embds = get_embd(images, is_training_dropout, is_training_bn)
     logits = get_logits(embds, labels, config)
     return embds, logits
 
@@ -74,6 +74,8 @@ class Trainer:
         train_iterator = train_dataset.make_one_shot_iterator()
         self.train_images, self.train_labels = train_iterator.get_next()
         self.train_images = tf.identity(self.train_images, 'input_images')
+        if self.quantize:
+            self.train_images = tf.quantization.fake_quant_with_min_max_args(self.train_images, 0, 255)
         self.train_labels = tf.identity(self.train_labels, 'labels')
 
         if self.gpu_num <= 1:
@@ -90,7 +92,7 @@ class Trainer:
 
             if self.quantize is True:
                 print("use quantize aware training!!!!!!!!!!!!!!!!!!!!!")
-                tf.contrib.quantize.create_training_graph(quant_delay=200)
+                tf.contrib.quantize.create_training_graph(input_graph=tf.get_default_graph(), quant_delay=0)
 
             with tf.control_dependencies(update_ops):
                 self.train_op = tf.train.MomentumOptimizer(learning_rate=self.lr, momentum=self.config['momentum']).minimize(self.train_loss)

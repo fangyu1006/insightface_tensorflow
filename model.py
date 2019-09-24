@@ -1,7 +1,7 @@
 import tensorflow as tf
 from backbones import fresnet
 
-def get_embd(inputs, is_training_dropout, is_training_bn, config, reuse=False, scope='embd_extractor'):
+def get_embd(inputs, is_training_dropout, is_training_bn, reuse=False, scope='embd_extractor'):
     num_classes = 512
     num_layers = 18
     filter_list = [64,64,128,256,512]
