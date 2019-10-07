@@ -63,7 +63,11 @@ def batch_norm(x, train, eps=1e-05, decay=0.9, affine=True, name=None):
 		mean, variance = tf.nn.moments(x, list(range(len(x.get_shape()) - 1)))
 		with tf.compat.v1.control_dependencies([assign_moving_average(moving_mean, mean, decay), assign_moving_average(moving_variance, variance, decay)]):
 			return tf.compat.v1.identity(mean), tf.compat.v1.identity(variance)
-	mean, variance = tf.compat.v1.cond(train, mean_var_with_update, lambda: (moving_mean, moving_variance))
+	#if train is True:
+	mean, variance = mean_var_with_update()
+	#else:
+		#mean, variance = moving_mean, moving_variance
+	#mean, variance = tf.compat.v1.cond(train, mean_var_with_update, lambda: (moving_mean, moving_variance))
 	if affine:
 		offset = tf.compat.v1.get_variable(name=name+'_bias', shape=param_shape, initializer=tf.zeros_initializer)
 		scale = tf.compat.v1.get_variable(name=name+'_scale', shape=param_shape, initializer=tf.ones_initializer)
@@ -74,8 +78,9 @@ def batch_norm(x, train, eps=1e-05, decay=0.9, affine=True, name=None):
 
 
 def prelu(input, name):
-    gamma = tf.compat.v1.get_variable(shape=input.get_shape()[-1], initializer=tf.constant_initializer(0.1), dtype=input.dtype, trainable=True, name=name + "_gamma")
-    return tf.maximum(0.0, input) + gamma * tf.minimum(0.0, input)
+    #gamma = tf.compat.v1.get_variable(shape=input.get_shape()[-1], initializer=tf.constant_initializer(0.1), dtype=input.dtype, trainable=True, name=name + "_gamma")
+    #return tf.maximum(0.0, input) + gamma * tf.minimum(0.0, input)
+    return tf.compat.v1.nn.relu(input, name)
 
 def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck, is_train):
 	#bn1 = tf.compat.v1.layers.batch_normalization(data, momentum=0.9, epsilon=2e-05, name=name+'_bn1', training=is_train)
@@ -105,7 +110,9 @@ def get_fc1(last_conv, num_classes, is_training_dropout, is_training_bn, input_c
 	body = last_conv
 	#body = tf.compat.v1.layers.batch_normalization(body, momentum=0.9, epsilon=2e-05, name='bn1', training=is_training_bn)
 	body = batch_norm(x=body, train=is_training_bn, eps=2e-05, name='bn1')
-	body = tf.compat.v1.layers.dropout(inputs=body, rate=0.4, training=is_training_dropout)
+	#body = tf.compat.v1.layers.dropout(inputs=body, rate=0.4, training=is_training_dropout)
+	#if is_training_dropout is True:
+	body = tf.compat.v1.nn.dropout(x=body, keep_prob=0.4)
 	fc1 = tf.contrib.layers.flatten(body)
 	fc1 = tf.compat.v1.layers.dense(inputs=fc1, units=num_classes, use_bias = True)
 	#fc1 = tf.compat.v1.layers.batch_normalization(fc1, momentum=0.9, epsilon=2e-05, name='fc1', training=is_training_bn)
@@ -119,8 +126,12 @@ def resnet(inputs, units, num_stages, filter_list, num_classes, bottle_neck, is_
 
 	mulscalar0_second = tf.constant([0.0078125], dtype=tf.float32, name='mulscalar0_second')
 	minusscalar0_second = tf.constant([127.5], dtype=tf.float32, name='minusscalar0_second')
-	data = inputs - minusscalar0_second
-	data = data * mulscalar0_second
+	#data = inputs - minusscalar0_second
+	#data = data * mulscalar0_second
+	data = tf.subtract(inputs, minusscalar0_second)
+	#data = tf.quantization.fake_quant_with_min_max_args(data, -127.5, 127.5)
+	data = tf.quantization.fake_quant_with_min_max_vars(data, -127.5, 127.5)
+	data = tf.multiply(data, mulscalar0_second)
 	body = data
 	conv0_pad = tf.pad(body, paddings = [[0, 0], [1, 1], [1, 1], [0, 0]])
 	#conv1 = tf.compat.v1.layers.conv2d(inputs=conv0_pad, filters=filter_list[0], kernel_size=(3,3),strides=(1,1), padding='valid',use_bias=False,name='conv0')

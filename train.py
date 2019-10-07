@@ -60,8 +60,10 @@ class Trainer:
             f.write(yaml.dump(self.config))
 
     def build(self):
-        self.train_phase_dropout = tf.placeholder(dtype=tf.bool, shape=None, name='train_phase_dropout')
-        self.train_phase_bn = tf.placeholder(dtype=tf.bool, shape=None, name='train_phase_bn')
+        #self.train_phase_dropout = tf.placeholder(dtype=tf.bool, shape=None, name='train_phase_dropout')
+        #self.train_phase_bn = tf.placeholder(dtype=tf.bool, shape=None, name='train_phase_bn')
+        self.train_phase_dropout = True
+        self.train_phase_bn = True
         self.global_step = tf.Variable(name='global_step', initial_value=0, trainable=False)
         self.inc_op = tf.assign_add(self.global_step, 1, name='increment_global_step')
         scale = int(512.0/self.batch_size)
@@ -110,18 +112,20 @@ class Trainer:
         left = len(images) % self.batch_size
         embds = []
         for i in range(batch_num):
-            cur_embd = sess.run(self.embds, feed_dict={self.train_images: images[i*self.batch_size: (i+1)*self.batch_size], self.train_phase_dropout: False, self.train_phase_bn: self.val_bn_train})
+            #cur_embd = sess.run(self.embds, feed_dict={self.train_images: images[i*self.batch_size: (i+1)*self.batch_size], self.train_phase_dropout: False, self.train_phase_bn: self.val_bn_train})
+            cur_embd = sess.run(self.embds, feed_dict={self.train_images: images[i*self.batch_size: (i+1)*self.batch_size]})
             embds += list(cur_embd)
         if left > 0:
             image_batch = np.zeros([self.batch_size, self.image_size, self.image_size, 3])
             image_batch[:left, :, :, :] = images[-left:]
-            cur_embd = sess.run(self.embds, feed_dict={self.train_images: image_batch, self.train_phase_dropout: False, self.train_phase_bn: self.val_bn_train})
+            cur_embd = sess.run(self.embds, feed_dict={self.train_images: image_batch})
             embds += list(cur_embd)[:left]
         return np.array(embds)
 
     def train(self):
         self.build()
-        analyze_vars(tf.trainable_variables(), os.path.join(self.output_dir, 'model_vars.txt'))
+        #analyze_vars(tf.trainable_variables(), os.path.join(self.output_dir, 'model_vars.txt'))
+        analyze_vars(tf.all_variables(), os.path.join(self.output_dir, 'model_vars.txt'))
         with open(os.path.join(self.output_dir, 'regularizers.txt'), 'w') as f:
             for v in tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES):
                 f.write(v.name+'\n')
